@@ -57,12 +57,37 @@ class Settings:
         upload_roots: Directories local file uploads are allowed from. Empty
             means uploads are disabled — see `REDMINE_UPLOAD_ROOTS` in
             SECURITY.md.
+        ssl_verify: Whether to verify the Redmine server's TLS certificate.
+            Defaults to `True`; set `REDMINE_SSL_VERIFY=false` only for a
+            trusted self-signed/internal cert you cannot otherwise validate —
+            disabling it removes protection against man-in-the-middle
+            attacks on that connection.
     """
 
     url: str
     api_key: str
     timeout: float = DEFAULT_TIMEOUT
     upload_roots: tuple[Path, ...] = ()
+    ssl_verify: bool = True
+
+
+_FALSE_VALUES = {"0", "false", "no", "off"}
+
+
+def _parse_bool(raw: str, *, default: bool) -> bool:
+    """Parse a boolean-flavoured environment variable.
+
+    Args:
+        raw: The raw environment value; blank means "unset".
+        default: Value to use when `raw` is blank.
+
+    Returns:
+        `False` if `raw` (case-insensitively) is one of "0", "false", "no",
+        "off"; `True` for any other non-blank value; `default` if blank.
+    """
+    if not raw:
+        return default
+    return raw.strip().lower() not in _FALSE_VALUES
 
 
 def _parse_upload_roots(raw: str) -> tuple[Path, ...]:
@@ -141,7 +166,12 @@ def load_settings() -> Settings:
             raise ConfigurationError("REDMINE_TIMEOUT must be greater than zero.")
 
     upload_roots = _parse_upload_roots(os.environ.get("REDMINE_UPLOAD_ROOTS", ""))
+    ssl_verify = _parse_bool(os.environ.get("REDMINE_SSL_VERIFY", ""), default=True)
 
     return Settings(
-        url=url, api_key=api_key, timeout=timeout, upload_roots=upload_roots
+        url=url,
+        api_key=api_key,
+        timeout=timeout,
+        upload_roots=upload_roots,
+        ssl_verify=ssl_verify,
     )

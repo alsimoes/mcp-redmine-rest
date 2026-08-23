@@ -9,6 +9,13 @@ identifiers.
 
 ## [Unreleased]
 
+### Added
+
+- `REDMINE_SSL_VERIFY` environment variable to control TLS certificate
+  verification for outbound calls to Redmine. Defaults to `true`; set to
+  `false` only for a trusted self-signed/internal certificate you cannot
+  otherwise validate — see [SECURITY.md](SECURITY.md#network-exposure).
+
 ## [1.0.2] - 2026-08-17
 
 ### Fixed

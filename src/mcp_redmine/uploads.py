@@ -163,6 +163,7 @@ def upload_file(
                 headers=headers,
                 data=handle,
                 timeout=UPLOAD_TIMEOUT,
+                verify=client.ssl_verify,
             )
     except requests.RequestException as exc:
         raise RedmineError(f"network failure during upload: {exc}") from exc

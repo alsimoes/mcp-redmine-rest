@@ -96,6 +96,7 @@ The server reads its configuration from environment variables:
 | `REDMINE_API_KEY` | Yes | Your API access key, from My account → API access key. |
 | `REDMINE_TIMEOUT` | No | Per-request timeout in seconds. Defaults to 15. |
 | `REDMINE_UPLOAD_ROOTS` | No | Directories the file-upload tools may read from, separated by `os.pathsep` (`;` on Windows, `:` on Linux/macOS). **Unset = uploads disabled.** See [Security](#security). |
+| `REDMINE_SSL_VERIFY` | No | Verify the Redmine server's TLS certificate. Defaults to `true`. Set to `false` only for a trusted self-signed/internal cert you cannot otherwise validate — this disables protection against man-in-the-middle attacks on that connection. |
 
 ### Keeping the key out of the client configuration
 

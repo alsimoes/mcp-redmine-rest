@@ -95,6 +95,35 @@ def test_validation_errors_are_extracted_from_body(
     assert "Subject cannot be blank" in str(exc_info.value)
 
 
+def test_ssl_verify_defaults_to_true(
+    redmine_client: RedmineClient, mocked_responses: responses_lib.RequestsMock
+) -> None:
+    mocked_responses.add(
+        responses_lib.GET,
+        "https://redmine.example.com/issues.json",
+        json={},
+        status=200,
+    )
+    redmine_client.request("GET", "/issues.json")
+    assert mocked_responses.calls[0].request.req_kwargs["verify"] is True  # type: ignore[attr-defined]
+
+
+def test_ssl_verify_false_is_forwarded_to_requests(
+    mocked_responses: responses_lib.RequestsMock,
+) -> None:
+    client = RedmineClient(
+        Settings(url="https://redmine.example.com", api_key="key", ssl_verify=False)
+    )
+    mocked_responses.add(
+        responses_lib.GET,
+        "https://redmine.example.com/issues.json",
+        json={},
+        status=200,
+    )
+    client.request("GET", "/issues.json")
+    assert mocked_responses.calls[0].request.req_kwargs["verify"] is False  # type: ignore[attr-defined]
+
+
 def test_network_failure_is_wrapped(
     redmine_client: RedmineClient, mocked_responses: responses_lib.RequestsMock
 ) -> None:
