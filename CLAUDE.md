@@ -11,7 +11,8 @@ failures into readable text; it does not implement its own authorization.
 - `src/mcp_redmine/app.py` — FastMCP instance, the `tool` decorator, `main()`
   entry point.
 - `src/mcp_redmine/config.py` — reads `REDMINE_URL` / `REDMINE_API_KEY` /
-  `REDMINE_TIMEOUT` from the environment.
+  `REDMINE_TIMEOUT` / `REDMINE_UPLOAD_ROOTS` / `REDMINE_SSL_VERIFY` from the
+  environment.
 - `src/mcp_redmine/client.py` — HTTP client wrapping the Redmine REST API.
 - `src/mcp_redmine/errors.py` — `RedmineError` and message formatting.
 - `src/mcp_redmine/tools/*.py` — one module per Redmine resource (issues,
@@ -44,23 +45,25 @@ not add delete tools for these two resources.
 
 ## Running checks (local venv)
 
-Use forward slashes — the shell here is Git Bash, where `\` is an escape
-character and `venv\Scripts\python.exe` fails with "command not found".
-
-These only read; they never modify the working tree:
+The virtualenv lives in `.venv/`. These only read; they never modify the
+working tree:
 
 ```
-venv/Scripts/python.exe -m pytest
-venv/Scripts/python.exe -m ruff check .
-venv/Scripts/python.exe -m ruff format --check .
-venv/Scripts/python.exe -m mypy src
+.venv/bin/python -m pytest
+.venv/bin/python -m ruff check .
+.venv/bin/python -m ruff format --check .
+.venv/bin/python -m mypy src
 ```
 
 To actually reformat (this rewrites files, so it is not a check):
 
 ```
-venv/Scripts/python.exe -m ruff format .
+.venv/bin/python -m ruff format .
 ```
+
+On Windows the interpreter is at `.venv/Scripts/python.exe` instead. Use
+forward slashes there too — under Git Bash `\` is an escape character, so
+`.venv\Scripts\python.exe` fails with "command not found".
 
 - Ruff lints with `E`, `W`, `F`, `I`, `N`, `D`, `UP`, `B`, `ANN`, `S`, and
   `RUF` enabled — see `[tool.ruff.lint]` in `pyproject.toml` for the
@@ -72,9 +75,13 @@ venv/Scripts/python.exe -m ruff format .
 
 ## Configuration
 
-`REDMINE_URL` and `REDMINE_API_KEY` are required; `REDMINE_TIMEOUT` is
-optional (default 15s). Never commit real values — use your MCP client's env
-config or a local, gitignored `.env`.
+`REDMINE_URL` and `REDMINE_API_KEY` are required. The rest are optional:
+`REDMINE_TIMEOUT` (default 15s), `REDMINE_UPLOAD_ROOTS` (unset means uploads
+are refused — see [SECURITY.md](SECURITY.md#file-uploads-prompt-injection-is-the-default-threat-model)),
+and `REDMINE_SSL_VERIFY` (default true; only set it false for a trusted
+self-signed cert — see [SECURITY.md](SECURITY.md#network-exposure)). Never
+commit real values — use your MCP client's env config or a local, gitignored
+`.env`.
 
 `load_settings()` merges a `.env` into the environment first, without
 overriding variables that are already set, so the client's `env` block wins.
@@ -84,4 +91,6 @@ that is set. `tests/conftest.py` has an autouse fixture pointing
 leak into the tests.
 
 Claude Desktop builds a minimal environment for the servers it launches and
-does not pass through user or shell variables — `setx` has no effect there.
+does not pass through user or shell variables. Exporting a variable from your
+shell rc (or `setx` on Windows) has no effect there — put it in the server's
+`env` block instead.
