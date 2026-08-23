@@ -116,6 +116,15 @@ server needs to run somewhere with access to that network — which in
 practice means a local Claude Desktop/Claude Code setup, not a browser-based
 client with no path to your network.
 
+By default, outbound HTTPS calls verify the server's TLS certificate.
+`REDMINE_SSL_VERIFY=false` disables that verification for every request,
+including file uploads — use it only for a trusted self-signed or internal
+certificate you cannot otherwise validate (for example, add it to your
+system's CA store instead, if that's an option). With verification off, the
+connection has no protection against a man-in-the-middle intercepting or
+altering traffic to your Redmine instance, including the API key sent on
+every request.
+
 ## Reporting a vulnerability
 
 If you find a security issue in this project, please open a

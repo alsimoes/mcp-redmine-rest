@@ -158,6 +158,36 @@ def test_upload_roots_nonexistent_directory_raises(
         load_settings()
 
 
+def test_ssl_verify_defaults_to_true(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("REDMINE_URL", "https://redmine.example.com")
+    monkeypatch.setenv("REDMINE_API_KEY", "key")
+    monkeypatch.delenv("REDMINE_SSL_VERIFY", raising=False)
+    settings = load_settings()
+    assert settings.ssl_verify is True
+
+
+@pytest.mark.parametrize("raw", ["false", "False", "0", "no", "off"])
+def test_ssl_verify_falsy_values_disable_verification(
+    monkeypatch: pytest.MonkeyPatch, raw: str
+) -> None:
+    monkeypatch.setenv("REDMINE_URL", "https://redmine.example.com")
+    monkeypatch.setenv("REDMINE_API_KEY", "key")
+    monkeypatch.setenv("REDMINE_SSL_VERIFY", raw)
+    settings = load_settings()
+    assert settings.ssl_verify is False
+
+
+@pytest.mark.parametrize("raw", ["true", "True", "1", "yes", "on"])
+def test_ssl_verify_truthy_values_enable_verification(
+    monkeypatch: pytest.MonkeyPatch, raw: str
+) -> None:
+    monkeypatch.setenv("REDMINE_URL", "https://redmine.example.com")
+    monkeypatch.setenv("REDMINE_API_KEY", "key")
+    monkeypatch.setenv("REDMINE_SSL_VERIFY", raw)
+    settings = load_settings()
+    assert settings.ssl_verify is True
+
+
 def test_missing_env_file_is_not_an_error(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

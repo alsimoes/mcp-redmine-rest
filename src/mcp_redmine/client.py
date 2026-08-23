@@ -45,6 +45,11 @@ class RedmineClient:
         """Directories local file uploads are allowed from (empty = disabled)."""
         return self._settings.upload_roots
 
+    @property
+    def ssl_verify(self) -> bool:
+        """Whether TLS certificate verification is enabled for this client."""
+        return self._settings.ssl_verify
+
     def request(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
         """Call the Redmine API and return the decoded JSON body.
 
@@ -65,7 +70,11 @@ class RedmineClient:
         url = f"{self._settings.url}{path}"
         try:
             response = self._session.request(
-                method, url, timeout=self._settings.timeout, **kwargs
+                method,
+                url,
+                timeout=self._settings.timeout,
+                verify=self._settings.ssl_verify,
+                **kwargs,
             )
         except requests.RequestException as exc:
             raise RedmineError(f"network failure while calling Redmine: {exc}") from exc

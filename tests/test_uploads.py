@@ -284,6 +284,27 @@ def test_missing_token_in_response_raises(
         upload_file(client, str(report))
 
 
+def test_ssl_verify_false_is_forwarded_to_upload_request(
+    client_factory: Callable[..., RedmineClient],
+    mocked_responses: responses_lib.RequestsMock,
+    tmp_path: Path,
+) -> None:
+    client = client_factory(upload_roots=(tmp_path,), ssl_verify=False)
+    report = tmp_path / "report.txt"
+    report.write_bytes(b"content")
+
+    mocked_responses.add(
+        responses_lib.POST,
+        "https://redmine.example.com/uploads.json",
+        json={"upload": {"token": "tok"}},
+        status=201,
+    )
+
+    upload_file(client, str(report))
+
+    assert mocked_responses.calls[0].request.req_kwargs["verify"] is False  # type: ignore[attr-defined]
+
+
 def test_custom_file_name_overrides_basename(
     client_factory: Callable[..., RedmineClient],
     mocked_responses: responses_lib.RequestsMock,

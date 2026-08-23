@@ -56,6 +56,7 @@ The server reads these environment variables:
 | `REDMINE_API_KEY` | Yes | The user's API access key |
 | `REDMINE_TIMEOUT` | No | Per-request timeout in seconds. Defaults to 15 |
 | `REDMINE_UPLOAD_ROOTS` | No | Directories the file-upload tools may read from, separated by `os.pathsep`. **Leave unset unless the user asks for upload support** — see below |
+| `REDMINE_SSL_VERIFY` | No | Verify the Redmine server's TLS certificate. Defaults to `true`. **Only set to `false` for a trusted self-signed/internal cert the user cannot otherwise validate** — it disables protection against man-in-the-middle attacks on that connection, so don't set it on your own initiative. |
 
 **Ask the user for `REDMINE_URL` and `REDMINE_API_KEY`. Never invent, guess, or
 carry over placeholder values** — a wrong URL fails with a network error and a
